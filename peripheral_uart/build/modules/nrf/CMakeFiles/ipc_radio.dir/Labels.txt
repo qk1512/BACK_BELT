@@ -1,0 +1,13 @@
+# Target labels
+ ipc_radio
+# Source files and their labels
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/CMakeFiles/ipc_radio
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/CMakeFiles/ipc_radio.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/CMakeFiles/ipc_radio-complete.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/ipc_radio-prefix/src/ipc_radio-stamp/ipc_radio-build.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/ipc_radio-prefix/src/ipc_radio-stamp/ipc_radio-configure.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/ipc_radio-prefix/src/ipc_radio-stamp/ipc_radio-download.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/ipc_radio-prefix/src/ipc_radio-stamp/ipc_radio-install.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/ipc_radio-prefix/src/ipc_radio-stamp/ipc_radio-mkdir.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/ipc_radio-prefix/src/ipc_radio-stamp/ipc_radio-patch.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/ipc_radio-prefix/src/ipc_radio-stamp/ipc_radio-update.rule

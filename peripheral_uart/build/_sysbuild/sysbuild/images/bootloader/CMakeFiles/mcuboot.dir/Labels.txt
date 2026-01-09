@@ -1,0 +1,13 @@
+# Target labels
+ mcuboot
+# Source files and their labels
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/CMakeFiles/mcuboot
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/CMakeFiles/mcuboot.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/CMakeFiles/mcuboot-complete.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-build.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-configure.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-download.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-install.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-mkdir.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-patch.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-update.rule

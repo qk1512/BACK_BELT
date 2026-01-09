@@ -1,0 +1,33 @@
+{
+    "format-version": 1,
+    "time": 1767959493,
+    "files": [
+        {
+            "type": "application",
+            "board": "thingy53",
+            "soc": "nrf5340",
+            "load_address": 66048,
+            "image_index": "0",
+            "slot_index_primary": "1",
+            "slot_index_secondary": "2",
+            "version_MCUBOOT": "3.1.1+0",
+            "size": 284572,
+            "file": "peripheral_uart.signed.bin",
+            "modtime": 1767959491
+        },
+        {
+            "type": "application",
+            "board": "thingy53/nrf5340/cpunet",
+            "soc": "nrf5340",
+            "image_index": "1",
+            "slot_index_primary": "3",
+            "slot_index_secondary": "4",
+            "load_address": 16812032,
+            "version": "1",
+            "size": 172900,
+            "file": "ipc_radio.bin",
+            "modtime": 1767959493
+        }
+    ],
+    "name": "peripheral_uart"
+}

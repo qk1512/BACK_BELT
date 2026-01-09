@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/CMakeFiles/mcuboot"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/CMakeFiles/mcuboot.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/CMakeFiles/mcuboot-complete.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-build.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-configure.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-download.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-install.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-mkdir.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-patch.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/bootloader/mcuboot-prefix/src/mcuboot-stamp/mcuboot-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"mcuboot"
+		],
+		"name" : "mcuboot"
+	}
+}

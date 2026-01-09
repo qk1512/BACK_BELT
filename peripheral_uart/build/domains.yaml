@@ -1,0 +1,14 @@
+default: peripheral_uart
+build_dir: /home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build
+domains:
+  - name: peripheral_uart
+    build_dir: /home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/peripheral_uart
+  - name: mcuboot
+    build_dir: /home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/mcuboot
+  - name: ipc_radio
+    build_dir: /home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/ipc_radio
+  - name: b0n
+    build_dir: /home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/b0n
+flash_order:
+  - ipc_radio
+  - peripheral_uart

@@ -1,0 +1,43 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/CMakeFiles/b0n"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/CMakeFiles/b0n.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/CMakeFiles/b0n-complete.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/b0n-prefix/src/b0n-stamp/b0n-build.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/b0n-prefix/src/b0n-stamp/b0n-configure.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/b0n-prefix/src/b0n-stamp/b0n-download.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/b0n-prefix/src/b0n-stamp/b0n-install.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/b0n-prefix/src/b0n-stamp/b0n-mkdir.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/b0n-prefix/src/b0n-stamp/b0n-patch.rule"
+		},
+		{
+			"file" : "/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/modules/nrf/b0n-prefix/src/b0n-stamp/b0n-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"b0n"
+		],
+		"name" : "b0n"
+	}
+}

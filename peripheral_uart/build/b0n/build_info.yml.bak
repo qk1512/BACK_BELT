@@ -1,0 +1,53 @@
+cmake:
+  application:
+    configuration-dir: '/home/khanh/ncs/v3.1.1/nrf/samples/nrf5340/netboot'
+    source-dir: '/home/khanh/ncs/v3.1.1/nrf/samples/nrf5340/netboot'
+  board:
+    name: 'thingy53'
+    path:
+     - '/home/khanh/ncs/v3.1.1/zephyr/boards/nordic/thingy53'
+    qualifiers: 'nrf5340/cpunet'
+    revision: ''
+  devicetree:
+    bindings-dirs:
+     - '/home/khanh/ncs/v3.1.1/nrf/dts/bindings'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts/bindings'
+    files:
+     - '/home/khanh/ncs/v3.1.1/zephyr/boards/nordic/thingy53/thingy53_nrf5340_cpunet.dts'
+    include-dirs:
+     - '/home/khanh/ncs/v3.1.1/nrf/include'
+     - '/home/khanh/ncs/v3.1.1/nrf/dts/common'
+     - '/home/khanh/ncs/v3.1.1/nrf/dts/riscv'
+     - '/home/khanh/ncs/v3.1.1/nrf/dts/arm'
+     - '/home/khanh/ncs/v3.1.1/nrf/dts'
+     - '/home/khanh/ncs/v3.1.1/zephyr/include'
+     - '/home/khanh/ncs/v3.1.1/zephyr/include/zephyr'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts/common'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts/vendor'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts/rx'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts/x86'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts/xtensa'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts/sparc'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts/riscv'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts/posix'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts/arm64'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts/arm'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts/arc'
+     - '/home/khanh/ncs/v3.1.1/zephyr/dts'
+  kconfig:
+    files:
+     - '/home/khanh/ncs/v3.1.1/zephyr/boards/nordic/thingy53/thingy53_nrf5340_cpunet_defconfig'
+     - '/home/khanh/ncs/v3.1.1/nrf/samples/nrf5340/netboot/prj.conf'
+     - '/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/b0n/zephyr/.config.sysbuild'
+    user-files:
+     - '/home/khanh/ncs/v3.1.1/nrf/samples/nrf5340/netboot/prj.conf'
+  toolchain:
+    name: 'zephyr'
+    path: '/home/khanh/ncs/toolchains/b2ecd2435d/opt/zephyr-sdk'
+  vendor-specific:
+    nordic:
+      svdfile: '/home/khanh/ncs/v3.1.1/modules/hal/nordic/nrfx/mdk/nrf5340_network.svd'
+  zephyr:
+    version: '4.1.99'
+    zephyr-base: '/home/khanh/ncs/v3.1.1/zephyr'
+version: '0.1.0'

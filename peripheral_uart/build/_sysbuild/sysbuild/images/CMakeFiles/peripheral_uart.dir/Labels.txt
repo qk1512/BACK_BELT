@@ -1,0 +1,13 @@
+# Target labels
+ peripheral_uart
+# Source files and their labels
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/CMakeFiles/peripheral_uart
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/CMakeFiles/peripheral_uart.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/CMakeFiles/peripheral_uart-complete.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/peripheral_uart-prefix/src/peripheral_uart-stamp/peripheral_uart-build.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/peripheral_uart-prefix/src/peripheral_uart-stamp/peripheral_uart-configure.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/peripheral_uart-prefix/src/peripheral_uart-stamp/peripheral_uart-download.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/peripheral_uart-prefix/src/peripheral_uart-stamp/peripheral_uart-install.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/peripheral_uart-prefix/src/peripheral_uart-stamp/peripheral_uart-mkdir.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/peripheral_uart-prefix/src/peripheral_uart-stamp/peripheral_uart-patch.rule
+/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/_sysbuild/sysbuild/images/peripheral_uart-prefix/src/peripheral_uart-stamp/peripheral_uart-update.rule
