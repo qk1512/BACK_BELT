@@ -14695,7 +14695,7 @@ build modules/nrf/CMakeFiles/app_commit_h | ${cmake_ninja_workdir}modules/nrf/CM
 #############################################
 # Custom command for zephyr/include/generated/app_commit.h
 
-build zephyr/include/generated/app_commit.h | ${cmake_ninja_workdir}zephyr/include/generated/app_commit.h: CUSTOM_COMMAND ../../VERSION /home/khanh/ncs/v3.1.1/nrf/.git/index
+build zephyr/include/generated/app_commit.h | ${cmake_ninja_workdir}zephyr/include/generated/app_commit.h: CUSTOM_COMMAND ../../VERSION /home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/.git/index
   COMMAND = cd /home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/peripheral_uart/modules/nrf && /home/khanh/ncs/toolchains/b2ecd2435d/usr/local/bin/cmake -DZEPHYR_BASE=/home/khanh/ncs/v3.1.1/zephyr -DNRF_DIR=/home/khanh/ncs/v3.1.1/nrf -DOUT_FILE=/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart/build/peripheral_uart/zephyr/include/generated/app_commit.h -DCOMMIT_TYPE=APP -DCOMMIT_PATH=/home/khanh/ncs/v3.1.1/nrf/samples/bluetooth/peripheral_uart -P /home/khanh/ncs/v3.1.1/nrf/cmake/gen_commit_h.cmake
   DESC = Generating ../../zephyr/include/generated/app_commit.h
   restat = 1

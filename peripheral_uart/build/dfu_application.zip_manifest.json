@@ -1,6 +1,6 @@
 {
     "format-version": 1,
-    "time": 1767959493,
+    "time": 1768012825,
     "files": [
         {
             "type": "application",
@@ -13,7 +13,7 @@
             "version_MCUBOOT": "3.1.1+0",
             "size": 284572,
             "file": "peripheral_uart.signed.bin",
-            "modtime": 1767959491
+            "modtime": 1768012824
         },
         {
             "type": "application",
