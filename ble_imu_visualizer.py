@@ -31,6 +31,8 @@ class BleWorker:
         self.cmd_q = queue.Queue()
         self.thread = None
         self.loop = None
+        self.last_data_time = 0
+        self.data_count = 0
 
         self.client: BleakClient | None = None
         self.connected_addr: str | None = None
@@ -52,7 +54,13 @@ class BleWorker:
         self.ui_q.put(("conn", is_connected))
 
     def _ui_imu_data(self, yaw: float, pitch: float, roll: float):
-        self.ui_q.put(("imu", (yaw, pitch, roll)))
+        self.data_count += 1
+        # Chỉ gửi nếu queue chưa đầy, tránh lag khi nhận 100Hz
+        try:
+            self.ui_q.put_nowait(("imu", (yaw, pitch, roll)))
+        except queue.Full:
+            # Queue đầy, bỏ qua packet này (UI sẽ dùng data mới hơn)
+            pass
 
     def start(self):
         if self.thread and self.thread.is_alive():
@@ -335,6 +343,11 @@ class IMUVisualizer:
         self.pitch = 0.0
         self.roll = 0.0
         
+        # Throttling để tránh vẽ quá nhiều khi nhận 100Hz
+        self.last_draw_time = 0
+        self.min_draw_interval = 1.0 / 30.0  # Max 30 FPS
+        self.pending_update = False
+        
         self._setup_plot()
         self._draw_object()
 
@@ -439,25 +452,53 @@ class IMUVisualizer:
         self.ax.legend()
         self.canvas.draw()
 
-    def update(self, yaw, pitch, roll):
+    def update(self, yaw, pitch, roll, force=False):
         """
-        Update orientation and redraw
+        Update orientation and redraw (with throttling)
         """
         self.yaw = yaw
         self.pitch = pitch
         self.roll = roll
-        self._draw_object()
+        
+        current_time = time.time()
+        time_since_last_draw = current_time - self.last_draw_time
+        
+        # Throttle: chỉ vẽ lại nếu đủ thời gian hoặc force
+        if force or time_since_last_draw >= self.min_draw_interval:
+            self._draw_object()
+            self.last_draw_time = current_time
+            self.pending_update = False
+        else:
+            # Đánh dấu có update pending
+            self.pending_update = True
+    
+    def draw_pending(self):
+        """
+        Vẽ lại nếu có update pending
+        """
+        if self.pending_update:
+            current_time = time.time()
+            if current_time - self.last_draw_time >= self.min_draw_interval:
+                self._draw_object()
+                self.last_draw_time = current_time
+                self.pending_update = False
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("BLE IMU Visualizer - Yaw/Pitch/Roll")
+        self.title("BLE IMU Visualizer - Yaw/Pitch/Roll (High-Speed)")
         self.geometry("1100x700")
 
-        self.ui_q = queue.Queue()
+        # Giới hạn queue size để tránh tràn bộ nhớ khi nhận 100Hz
+        self.ui_q = queue.Queue(maxsize=50)
         self.worker = BleWorker(self.ui_q)
         self.worker.start()
+        
+        # Tracking data rate
+        self.data_rate_count = 0
+        self.data_rate_time = time.time()
+        self.current_data_rate = 0.0
 
         self._build_ui()
         self.after(80, self._poll_ui_queue)
@@ -534,6 +575,11 @@ class App(tk.Tk):
         self.var_roll = tk.StringVar(value="0.0°")
         ttk.Label(imu_frame, textvariable=self.var_roll, width=12, font=("TkDefaultFont", 12, "bold")).grid(
             row=2, column=1, sticky="w", pady=3)
+        
+        ttk.Label(imu_frame, text="Data Rate:").grid(row=3, column=0, sticky="w", pady=3)
+        self.var_data_rate = tk.StringVar(value="0 Hz")
+        ttk.Label(imu_frame, textvariable=self.var_data_rate, width=12, foreground="blue").grid(
+            row=3, column=1, sticky="w", pady=3)
 
         # --- Send command ---
         cmd_frame = ttk.LabelFrame(left_panel, text="Send Command", padding=10)
@@ -572,6 +618,7 @@ class App(tk.Tk):
 
         self._log("Ready. Connect to device to visualize IMU data.")
         self._log("Expected data format: JSON {'ypr':[yaw,pitch,roll]} or 'yaw,pitch,roll'")
+        self._log("Optimized for high-speed data (up to 100Hz)")
         self._set_connected(False)
 
     def _apply_settings(self):
@@ -619,9 +666,14 @@ class App(tk.Tk):
             self.btn_reconn.configure(state="normal")
 
     def _poll_ui_queue(self):
+        processed = 0
+        max_process = 10  # Xử lý tối đa 10 messages mỗi lần để tránh block UI
+        
         try:
-            while True:
+            while processed < max_process:
                 typ, payload = self.ui_q.get_nowait()
+                processed += 1
+                
                 if typ == "log":
                     self._log(payload)
                 elif typ == "status":
@@ -634,9 +686,26 @@ class App(tk.Tk):
                     self.var_pitch.set(f"{pitch:.1f}°")
                     self.var_roll.set(f"{roll:.1f}°")
                     self.visualizer.update(yaw, pitch, roll)
+                    
+                    # Đếm data rate
+                    self.data_rate_count += 1
         except queue.Empty:
             pass
-        self.after(80, self._poll_ui_queue)
+        
+        # Vẽ pending updates nếu có
+        self.visualizer.draw_pending()
+        
+        # Cập nhật data rate mỗi giây
+        current_time = time.time()
+        elapsed = current_time - self.data_rate_time
+        if elapsed >= 1.0:
+            self.current_data_rate = self.data_rate_count / elapsed
+            self.var_data_rate.set(f"{self.current_data_rate:.1f} Hz")
+            self.data_rate_count = 0
+            self.data_rate_time = current_time
+        
+        # Poll với interval ngắn hơn để xử lý 100Hz data
+        self.after(30, self._poll_ui_queue)
 
     def _on_close(self):
         try:
