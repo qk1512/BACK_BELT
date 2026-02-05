@@ -165,6 +165,7 @@ class BleWorker:
     def _parse_imu_data(self, txt: str):
         """
         Parse IMU data from various formats:
+        - JSON: {"sensor":{"time":78016,"status":true,"accel":[...],"gyro":[...],"ypr":[-12.27,-55.82,11.58]}}
         - JSON: {"time":31221,"accel":[0.02,0.24,-8.11],"gyro":[0.00,0.00,0.00],"ypr":[-31.54,-2.23,0.05]}
         - CSV: "yaw,pitch,roll"
         - Colon: "Y:yaw P:pitch R:roll"
@@ -174,10 +175,22 @@ class BleWorker:
             # Try JSON format first
             if txt.strip().startswith('{'):
                 data = json.loads(txt)
+                
+                # Check for nested sensor format: {"sensor":{"ypr":[...]}}
+                if 'sensor' in data and isinstance(data['sensor'], dict):
+                    sensor = data['sensor']
+                    if 'ypr' in sensor and isinstance(sensor['ypr'], list) and len(sensor['ypr']) >= 3:
+                        roll = float(sensor['ypr'][0])
+                        pitch = float(sensor['ypr'][1])
+                        yaw = float(sensor['ypr'][2])
+                        self._ui_imu_data(yaw, pitch, roll)
+                        return
+                
+                # Check for direct ypr format: {"ypr":[...]}
                 if 'ypr' in data and isinstance(data['ypr'], list) and len(data['ypr']) >= 3:
-                    yaw = float(data['ypr'][0])
+                    roll = float(data['ypr'][0])
                     pitch = float(data['ypr'][1])
-                    roll = float(data['ypr'][2])
+                    yaw = float(data['ypr'][2])
                     self._ui_imu_data(yaw, pitch, roll)
                     return
             
