@@ -332,7 +332,8 @@ class IMUVisualizer:
     Visualize IMU orientation in 3D using matplotlib
     """
     def __init__(self, parent_frame):
-        self.fig = Figure(figsize=(6, 6), dpi=100)
+        # DPI cực thấp để render siêu nhanh
+        self.fig = Figure(figsize=(6, 6), dpi=40)
         self.ax = self.fig.add_subplot(111, projection='3d')
         
         self.canvas = FigureCanvasTkAgg(self.fig, master=parent_frame)
@@ -343,10 +344,16 @@ class IMUVisualizer:
         self.pitch = 0.0
         self.roll = 0.0
         
-        # Throttling để tránh vẽ quá nhiều khi nhận 100Hz
-        self.last_draw_time = 0
-        self.min_draw_interval = 1.0 / 30.0  # Max 30 FPS
-        self.pending_update = False
+        # Giảm frame skipping để vẽ nhiều hơn = FPS cao hơn
+        self.skip_counter = 0
+        self.skip_every = 1  # Vẽ 1 trong 2 frames (50% render)
+        
+        # Cache cho legend (vẽ 1 lần)
+        self.legend_drawn = False
+        
+        # Performance tracking
+        self.frame_count = 0
+        self.last_fps_time = time.time()
         
         self._setup_plot()
         self._draw_object()
@@ -395,103 +402,102 @@ class IMUVisualizer:
 
     def _draw_object(self):
         """
-        Draw a 3D box representing the IMU sensor
+        Draw 3D box and axes arrows
         """
         self.ax.clear()
         self._setup_plot()
         
-        # Define box vertices (centered at origin)
+        # Box vertices - compact size
         vertices = np.array([
-            [-1, -0.5, -0.2],
-            [1, -0.5, -0.2],
-            [1, 0.5, -0.2],
-            [-1, 0.5, -0.2],
-            [-1, -0.5, 0.2],
-            [1, -0.5, 0.2],
-            [1, 0.5, 0.2],
-            [-1, 0.5, 0.2]
+            [-0.7, -0.35, -0.12],  # 0: bottom-left-back
+            [0.7, -0.35, -0.12],   # 1: bottom-right-back
+            [0.7, 0.35, -0.12],    # 2: bottom-right-front
+            [-0.7, 0.35, -0.12],   # 3: bottom-left-front
+            [-0.7, -0.35, 0.12],   # 4: top-left-back
+            [0.7, -0.35, 0.12],    # 5: top-right-back
+            [0.7, 0.35, 0.12],     # 6: top-right-front
+            [-0.7, 0.35, 0.12]     # 7: top-left-front
         ])
         
         # Apply rotation
         R = self._rotation_matrix(self.yaw, self.pitch, self.roll)
         rotated_vertices = vertices @ R.T
         
-        # Define the 6 faces of the box
+        # Chỉ vẽ 2 mặt chính (top, front) để tối ưu tối đa
         faces = [
-            [rotated_vertices[0], rotated_vertices[1], rotated_vertices[2], rotated_vertices[3]],  # bottom
             [rotated_vertices[4], rotated_vertices[5], rotated_vertices[6], rotated_vertices[7]],  # top
-            [rotated_vertices[0], rotated_vertices[1], rotated_vertices[5], rotated_vertices[4]],  # front
-            [rotated_vertices[2], rotated_vertices[3], rotated_vertices[7], rotated_vertices[6]],  # back
-            [rotated_vertices[0], rotated_vertices[3], rotated_vertices[7], rotated_vertices[4]],  # left
-            [rotated_vertices[1], rotated_vertices[2], rotated_vertices[6], rotated_vertices[5]]   # right
+            [rotated_vertices[3], rotated_vertices[2], rotated_vertices[6], rotated_vertices[7]]   # front
         ]
         
-        # Create 3D polygon collection
-        poly3d = Poly3DCollection(faces, alpha=0.7, facecolor='cyan', edgecolor='black', linewidth=2)
+        # Box polygon - NO EDGES để nhanh hơn
+        poly3d = Poly3DCollection(faces, facecolor='cyan', alpha=0.4, edgecolor='none')
         self.ax.add_collection3d(poly3d)
         
-        # Draw axes of the rotated object
-        axis_length = 1.5
+        # Draw axes arrows
+        axis_length = 1.2
         axes = np.array([
-            [axis_length, 0, 0],  # X axis
-            [0, axis_length, 0],  # Y axis
-            [0, 0, axis_length]   # Z axis
+            [axis_length, 0, 0],
+            [0, axis_length, 0],
+            [0, 0, axis_length]
         ])
         rotated_axes = axes @ R.T
         
-        # X axis (red)
+        # Arrows mỏng hơn
         self.ax.plot([0, rotated_axes[0, 0]], [0, rotated_axes[0, 1]], [0, rotated_axes[0, 2]], 
-                     'r-', linewidth=3, label='X')
-        # Y axis (green)
+                     'r-', linewidth=1.2)
         self.ax.plot([0, rotated_axes[1, 0]], [0, rotated_axes[1, 1]], [0, rotated_axes[1, 2]], 
-                     'g-', linewidth=3, label='Y')
-        # Z axis (blue)
+                     'g-', linewidth=1.2)
         self.ax.plot([0, rotated_axes[2, 0]], [0, rotated_axes[2, 1]], [0, rotated_axes[2, 2]], 
-                     'b-', linewidth=3, label='Z')
+                     'b-', linewidth=1.2)
         
-        self.ax.legend()
-        self.canvas.draw()
+        # Legend vẽ 1 lần
+        if not self.legend_drawn:
+            self.ax.plot([], [], 'r-', linewidth=1.2, label='X')
+            self.ax.plot([], [], 'g-', linewidth=1.2, label='Y')
+            self.ax.plot([], [], 'b-', linewidth=1.2, label='Z')
+            self.ax.legend(loc='upper right')
+            self.legend_drawn = True
+        
+        # Draw
+        self.canvas.draw_idle()
+        self.canvas.flush_events()
 
     def update(self, yaw, pitch, roll, force=False):
         """
-        Update orientation and redraw (with throttling)
+        Update orientation with reduced frame skipping for higher FPS
         """
         self.yaw = yaw
         self.pitch = pitch
         self.roll = roll
         
-        current_time = time.time()
-        time_since_last_draw = current_time - self.last_draw_time
+        # Frame skipping: vẽ 1 trong 2 frames
+        self.skip_counter += 1
+        if self.skip_counter <= self.skip_every:
+            return  # Bỏ qua frame này
         
-        # Throttle: chỉ vẽ lại nếu đủ thời gian hoặc force
-        if force or time_since_last_draw >= self.min_draw_interval:
-            self._draw_object()
-            self.last_draw_time = current_time
-            self.pending_update = False
-        else:
-            # Đánh dấu có update pending
-            self.pending_update = True
-    
-    def draw_pending(self):
-        """
-        Vẽ lại nếu có update pending
-        """
-        if self.pending_update:
-            current_time = time.time()
-            if current_time - self.last_draw_time >= self.min_draw_interval:
-                self._draw_object()
-                self.last_draw_time = current_time
-                self.pending_update = False
+        self.skip_counter = 0
+        
+        # Vẽ frame thực sự
+        self._draw_object()
+        
+        # Track FPS
+        self.frame_count += 1
+        current_time = time.time()
+        if current_time - self.last_fps_time >= 1.0:  # Mỗi 1s thay vì 2s
+            fps = self.frame_count / (current_time - self.last_fps_time)
+            print(f"[Render FPS: {fps:.1f}]")
+            self.frame_count = 0
+            self.last_fps_time = current_time
 
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("BLE IMU Visualizer - Yaw/Pitch/Roll (High-Speed)")
+        self.title("BLE IMU Visualizer - ULTRA HIGH FPS (DPI 40, 50% Render)")
         self.geometry("1100x700")
 
-        # Giới hạn queue size để tránh tràn bộ nhớ khi nhận 100Hz
-        self.ui_q = queue.Queue(maxsize=50)
+        # Real-time mode: queue lớn hơn để không mất gói tin
+        self.ui_q = queue.Queue(maxsize=200)
         self.worker = BleWorker(self.ui_q)
         self.worker.start()
         
@@ -501,7 +507,7 @@ class App(tk.Tk):
         self.current_data_rate = 0.0
 
         self._build_ui()
-        self.after(80, self._poll_ui_queue)
+        self.after(1, self._poll_ui_queue)  # EXTREME FAST: poll mỗi 1ms
 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
@@ -618,7 +624,7 @@ class App(tk.Tk):
 
         self._log("Ready. Connect to device to visualize IMU data.")
         self._log("Expected data format: JSON {'ypr':[yaw,pitch,roll]} or 'yaw,pitch,roll'")
-        self._log("Optimized for high-speed data (up to 100Hz)")
+        self._log("⚡ULTRA HIGH FPS: DPI 40, 50% render, 2 faces, no edges, 1ms poll")
         self._set_connected(False)
 
     def _apply_settings(self):
@@ -666,13 +672,14 @@ class App(tk.Tk):
             self.btn_reconn.configure(state="normal")
 
     def _poll_ui_queue(self):
-        processed = 0
-        max_process = 10  # Xử lý tối đa 10 messages mỗi lần để tránh block UI
+        # Xử lý TẤT CẢ gói có trong queue, không giới hạn
+        latest_imu = None
+        imu_received = 0
         
         try:
-            while processed < max_process:
+            # ĐỌNG VÒNG LẶP cho đến khi queue rỗng
+            while True:
                 typ, payload = self.ui_q.get_nowait()
-                processed += 1
                 
                 if typ == "log":
                     self._log(payload)
@@ -681,19 +688,20 @@ class App(tk.Tk):
                 elif typ == "conn":
                     self._set_connected(bool(payload))
                 elif typ == "imu":
-                    yaw, pitch, roll = payload
-                    self.var_yaw.set(f"{yaw:.1f}°")
-                    self.var_pitch.set(f"{pitch:.1f}°")
-                    self.var_roll.set(f"{roll:.1f}°")
-                    self.visualizer.update(yaw, pitch, roll)
-                    
-                    # Đếm data rate
-                    self.data_rate_count += 1
+                    # Chỉ giữ gói mới nhất
+                    latest_imu = payload
+                    imu_received += 1
         except queue.Empty:
             pass
         
-        # Vẽ pending updates nếu có
-        self.visualizer.draw_pending()
+        # Chỉ vẽ 1 lần với data mới nhất
+        if latest_imu is not None:
+            yaw, pitch, roll = latest_imu
+            self.var_yaw.set(f"{yaw:.1f}°")
+            self.var_pitch.set(f"{pitch:.1f}°")
+            self.var_roll.set(f"{roll:.1f}°")
+            self.visualizer.update(yaw, pitch, roll)
+            self.data_rate_count += imu_received
         
         # Cập nhật data rate mỗi giây
         current_time = time.time()
@@ -704,8 +712,8 @@ class App(tk.Tk):
             self.data_rate_count = 0
             self.data_rate_time = current_time
         
-        # Poll với interval ngắn hơn để xử lý 100Hz data
-        self.after(30, self._poll_ui_queue)
+        # EXTREME FAST: poll mỗi 2ms để giảm lag
+        self.after(2, self._poll_ui_queue)
 
     def _on_close(self):
         try:
