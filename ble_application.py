@@ -131,6 +131,10 @@ class BleWorker:
     def send(self, data: bytes, with_response: bool = False):
         self.cmd_q.put(("send", (data, with_response)))
 
+    def scan_devices(self, timeout: float = 8.0):
+        """Yêu cầu scan các thiết bị BLE và trả kết quả về UI."""
+        self.cmd_q.put(("scan", timeout))
+
     # ---------- Thread/async loop ----------
     def _thread_main(self):
         self.loop = asyncio.new_event_loop()
@@ -186,6 +190,10 @@ class BleWorker:
                 data, with_resp = payload
                 await self._send_flow(data, with_resp)
 
+            elif cmd == "scan":
+                timeout = payload
+                await self._scan_flow(timeout)
+
             # auto reconnect nếu đang “muốn kết nối” nhưng bị rớt
             if self.auto_reconnect and self.want_connected:
                 if not (self.client and self.client.is_connected):
@@ -194,6 +202,25 @@ class BleWorker:
                     await self._connect_flow()
 
             await asyncio.sleep(0.05)
+
+    async def _scan_flow(self, timeout: float = 8.0):
+        """Scan tất cả thiết bị BLE và gửi danh sách về UI."""
+        self._ui_status(f"Scanning BLE devices ({timeout:.0f}s)...")
+        self._ui_log(f"Scanning for BLE devices ({timeout:.0f}s)...")
+        try:
+            devices = await BleakScanner.discover(timeout=timeout)
+            device_list = []
+            for d in devices:
+                name = d.name if d.name else "(Unknown)"
+                device_list.append((name, d.address))
+                self._ui_log(f"Found: {name} @ {d.address}")
+            
+            self.ui_q.put(("devices", device_list))
+            self._ui_status(f"Scan complete. Found {len(device_list)} devices.")
+            self._ui_log(f"✅ Scan complete. Found {len(device_list)} devices.")
+        except Exception as e:
+            self._ui_log(f"❌ Scan error: {e}")
+            self._ui_status("Scan error.")
 
     async def _find_by_name(self, name: str, timeout: float = 8.0) -> str | None:
         self._ui_log(f"Scanning for name='{name}' ({timeout:.0f}s)...")
@@ -371,25 +398,27 @@ class App(tk.Tk):
         ttk.Checkbutton(top, text="Auto reconnect", variable=self.var_auto, command=self._apply_settings)\
             .grid(row=0, column=4, sticky="w", padx=(20, 0))
 
+        self.btn_scan    = ttk.Button(top, text="Scan Devices", command=self._scan_devices)
         self.btn_connect = ttk.Button(top, text="Connect", command=self._connect)
         self.btn_disc    = ttk.Button(top, text="Disconnect", command=self._disconnect)
         self.btn_reconn   = ttk.Button(top, text="Reconnect", command=self._reconnect)
 
-        self.btn_connect.grid(row=1, column=0, pady=(10, 0), sticky="w")
-        self.btn_disc.grid(row=1, column=1, pady=(10, 0), sticky="w")
-        self.btn_reconn.grid(row=1, column=2, pady=(10, 0), sticky="w")
+        self.btn_scan.grid(row=1, column=0, pady=(10, 0), sticky="w")
+        self.btn_connect.grid(row=1, column=1, pady=(10, 0), sticky="w")
+        self.btn_disc.grid(row=1, column=2, pady=(10, 0), sticky="w")
+        self.btn_reconn.grid(row=1, column=3, pady=(10, 0), sticky="w")
 
-        ttk.Label(top, text="Status:").grid(row=1, column=3, pady=(10, 0), sticky="e")
+        ttk.Label(top, text="Status:").grid(row=1, column=4, pady=(10, 0), sticky="e")
         self.var_status = tk.StringVar(value="Idle")
-        ttk.Label(top, textvariable=self.var_status).grid(row=1, column=4, pady=(10, 0), sticky="w")
+        ttk.Label(top, textvariable=self.var_status).grid(row=1, column=5, pady=(10, 0), sticky="w")
 
         self.var_conn = tk.StringVar(value="DISCONNECTED")
         self.lbl_conn = ttk.Label(top, textvariable=self.var_conn)
-        self.lbl_conn.grid(row=1, column=5, pady=(10, 0), sticky="w", padx=(20, 0))
+        self.lbl_conn.grid(row=1, column=6, pady=(10, 0), sticky="w", padx=(20, 0))
 
-        for c in range(6):
+        for c in range(7):
             top.grid_columnconfigure(c, weight=0)
-        top.grid_columnconfigure(3, weight=1)
+        top.grid_columnconfigure(4, weight=1)
 
         # --- Send command ---
         cmdf = ttk.LabelFrame(main, text="Send command (NUS RX)", padding=10)
@@ -406,6 +435,25 @@ class App(tk.Tk):
         ttk.Button(cmdf, text="Send", command=self._send).grid(row=0, column=3, sticky="w", padx=(10, 0))
 
         cmdf.grid_columnconfigure(1, weight=1)
+
+        # --- Discovered Devices ---
+        devf = ttk.LabelFrame(main, text="Discovered Devices", padding=10)
+        devf.pack(fill="both", expand=True, pady=(10, 0))
+
+        # Frame chứa listbox và scrollbar
+        list_frame = ttk.Frame(devf)
+        list_frame.pack(fill="both", expand=True)
+
+        self.device_listbox = tk.Listbox(list_frame, height=6)
+        self.device_listbox.pack(side="left", fill="both", expand=True)
+        self.device_listbox.bind("<<ListboxSelect>>", self._on_device_select)
+
+        dev_sb = ttk.Scrollbar(list_frame, command=self.device_listbox.yview)
+        dev_sb.pack(side="right", fill="y")
+        self.device_listbox.configure(yscrollcommand=dev_sb.set)
+
+        # Dictionary để lưu thông tin thiết bị (name -> address)
+        self.devices_dict = {}
 
         # --- Log area ---
         logf = ttk.LabelFrame(main, text="Log", padding=10)
@@ -440,6 +488,25 @@ class App(tk.Tk):
         self._update_target()
         self.worker.reconnect()
 
+    def _scan_devices(self):
+        """Gọi worker để scan thiết bị BLE."""
+        self.worker.scan_devices(timeout=8.0)
+
+    def _on_device_select(self, event):
+        """Xử lý khi người dùng chọn một thiết bị từ danh sách."""
+        selection = self.device_listbox.curselection()
+        if not selection:
+            return
+        idx = selection[0]
+        selected_text = self.device_listbox.get(idx)
+        
+        # Lấy tên thiết bị từ text (phần trước " @ ")
+        if " @ " in selected_text:
+            name, addr = selected_text.split(" @ ", 1)
+            self.var_name.set(name)
+            self.var_addr.set(addr)
+            self._log(f"Selected device: {name} @ {addr}")
+
     def _send(self):
         s = self.var_cmd.get()
         # hỗ trợ người dùng gõ \n trong GUI
@@ -464,6 +531,16 @@ class App(tk.Tk):
             self.btn_disc.configure(state="disabled")
             self.btn_reconn.configure(state="normal")
 
+    def _update_device_list(self, devices: list):
+        """Cập nhật danh sách thiết bị vào Listbox."""
+        self.device_listbox.delete(0, "end")
+        self.devices_dict.clear()
+        
+        for name, addr in devices:
+            display_text = f"{name} @ {addr}"
+            self.device_listbox.insert("end", display_text)
+            self.devices_dict[name] = addr
+
     def _poll_ui_queue(self):
         try:
             while True:
@@ -474,6 +551,8 @@ class App(tk.Tk):
                     self.var_status.set(payload)
                 elif typ == "conn":
                     self._set_connected(bool(payload))
+                elif typ == "devices":
+                    self._update_device_list(payload)
         except queue.Empty:
             pass
         self.after(80, self._poll_ui_queue)
